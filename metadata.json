@@ -1,0 +1,11 @@
+{
+  "name": "InterviewAI - 音声対話型AI面接練習＆リアルタイム添削",
+  "description": "面接本番さながらの音声対話でAI面接官と模擬面接。話した内容を即座にリアルタイム解析・フィードバックし、STAR法や論理的思考に基づいた改善アドバイスを提供します。",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
