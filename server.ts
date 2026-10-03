@@ -620,7 +620,11 @@ async function setupVite() {
   }
 }
 
-setupVite().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exitCode = 1;
-});
+export default app;
+
+if (process.env.VERCEL !== '1') {
+  setupVite().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exitCode = 1;
+  });
+}

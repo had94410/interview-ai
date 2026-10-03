@@ -40,6 +40,40 @@ interface InterviewRoomProps {
   onExit: () => void;
 }
 
+interface ApiErrorResponse {
+  success?: boolean;
+  error?: string;
+}
+
+interface EvaluationApiResponse extends ApiErrorResponse {
+  success: boolean;
+  feedback: AnswerFeedback;
+  interviewerReaction: string;
+  nextQuestion: string;
+  nextQuestionFocus?: string;
+  nextQuestionModelAnswer?: string;
+  nextQuestionTips?: string[];
+  isFinished: boolean;
+}
+
+interface FinalReportApiResponse extends ApiErrorResponse {
+  success: boolean;
+  report?: FinalReportData;
+}
+
+async function parseApiResponse<T extends ApiErrorResponse>(response: Response): Promise<T> {
+  const body = await response.text();
+
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    throw new Error(
+      `サーバーからJSONではなくWebページが返されました（HTTP ${response.status}）。` +
+        'npm run dev の起動ポートと、ブラウザーで開いているURLのポートが一致しているか確認してください。'
+    );
+  }
+}
+
 export const InterviewRoom: React.FC<InterviewRoomProps> = ({
   config,
   initialQuestion,
@@ -275,7 +309,7 @@ export const InterviewRoom: React.FC<InterviewRoomProps> = ({
         }),
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse<EvaluationApiResponse>(response);
       if (!data.success) {
         throw new Error(data.error || '評価処理に失敗しました。');
       }
@@ -323,6 +357,7 @@ export const InterviewRoom: React.FC<InterviewRoomProps> = ({
       }
     } catch (err: any) {
       console.error('Error in answer evaluation:', err);
+      setHistory(history);
       setErrorMessage(err.message || '回答の送信に失敗しました。もう一度お試しください。');
       setInterviewerState('listening');
     } finally {
@@ -345,7 +380,7 @@ export const InterviewRoom: React.FC<InterviewRoomProps> = ({
         }),
       });
 
-      const data = await res.json();
+      const data = await parseApiResponse<FinalReportApiResponse>(res);
       if (!data.success || !data.report) {
         throw new Error(data.error || 'レポート生成に失敗しました');
       }
